@@ -1,0 +1,209 @@
+@startuml
+
+!define DARKBLUE
+!includeurl https://raw.githubusercontent.com/Drakemor/RedDress-PlantUML/master/style.puml 
+
+class shape {
+    __Private__
+    material mat;
+    __Public__
+    shape();
+
+    shape(material mat);
+
+    material getMaterial(){return mat;};
+
+    virtual double isHit(ray Ray3f) = 0;
+
+    virtual vector calculateColor(vector pHit,light light) = 0;
+
+    virtual vector getNormal(vector pHit) = 0;    
+}
+note left : This class is abstract it is\nnecesarry since you\nmanipulate  lists of shapes\nso you need to define virtual\nmethods such as:\n-isHit()\n-calculateColor()\n-getNormal()\nwhich is redifined in each\ndaughter class
+
+
+package Shapes <<Frame>> {
+
+class  sphere
+{
+__Private__
+    double radius;
+    vector center = vector(0,0,0);
+__Public__
+    sphere(double radius,vector center,material mat);
+
+    vector getCenter();
+
+    void setCenter(vector newCenter);
+
+    double isHit(ray Ray3f);
+
+    vector getNormal(vector pHit);
+
+    vector calculateColor(vector pHit,light light);
+}
+
+class  plane
+{
+__Private__
+    vector normal = vector(0,0,0);
+    vector position = vector(0,0,0);
+__Public__
+    plane()
+
+    plane(vector normal, vector position, material mat);
+
+    double isHit(ray Ray3f);
+
+    vector calculateColor(vector pHit, light lights);
+
+    vector getNormal();
+
+    vector getNormal(vector pHit);
+    
+    vector getPosition();
+}
+
+class  cube {
+    __Private__
+    double width;
+    vector center = vector(0,0,0);
+    vector direction1 = vector(0,0,0);
+    vector direction2 = vector(0,0,0);
+    vector direction3 = vector(0,0,0);
+    __Public__
+    bool inDaCube(vector pHit,int k);
+
+    cube(double width,vector center,vector direction1, vector direction2 ,material mat);
+
+    vector getCenter();
+
+    void setCenter(vector newCenter);
+
+    double isHit(ray Ray3f);
+
+    vector getNormal(vector pHit);
+
+    vector calculateColor(vector pHit,light lights);
+}
+}
+shape <|-- cube
+shape <|-- sphere
+shape <|-- plane
+
+class material {
+    __Private__
+    int shininess = 0;
+    vector difuseColor = vector(0,0,0);
+    vector specularColor = vector(0,0,0);
+    vector colour = vector(0,0,0);
+
+    __Public__
+
+    material(int shine,vector difuse, vector specular, vector color);
+
+    material(vector color);
+
+    material();
+
+    int getShininess();
+
+    vector getDifuseColor();
+
+    vector getSpecularColor();
+
+    vector getColor();
+}
+
+class vector
+{   
+    __Private__
+    double x;
+    double y;
+    double z;
+    __Public__
+    vector()
+
+    double getX();
+
+    double getY();
+
+    double getZ();
+      
+    vector(double x1,double y1, double z1);
+
+    vector(const vector &v);
+
+    vector substraction(vector v);
+
+    vector add(vector v);
+
+    double scalar(vector v);
+
+    double abs();
+
+    vector normalize();
+
+    vector multiply(double coef);
+
+    vector cross(vector u);
+
+    friend std::ostream& operator<< (std::ostream& out, const vector& obj);
+
+    vector time(vector u);
+
+    bool operator == (const vector& rhs) const
+
+    vector operator + (vector);
+
+    vector operator - (vector);
+}
+note left : This class is used too recreate Vec3 \nclass that already exsist in cpp.
+
+class ray
+{
+    __Private__
+        vector origin;
+        vector direction;
+    __Public__
+    ray();
+
+    ray(vector origin, vector direction);
+
+    vector pointHit(double t);
+
+    vector getOrigin();
+
+    vector getDirection();
+}
+note top : Ray defines a simple object\nyet it is fundamental since\nthe raycasting method\nuses rays to create images
+
+class light
+{
+    __Private__
+        vector position = vector(0,0,0);
+        vector color = vector(0,0,0);
+    __Public__
+        light();
+
+        light(vector position, vector color);
+
+        void setPosition(vector newPos);
+
+        vector getPosition();
+
+        vector getColor();
+
+        void setColor(vector newColor);
+}
+
+
+light "0..*" -- "1..*" vector
+ray "0..*" -- "1..*" vector
+material "0..*" -- "1..*" shape
+material "0..*" -- "1..*" vector
+cube "0..*" -- "1..*" vector
+sphere "0..*" -- "1..*" vector
+plane "0..*" -- "1..*" vector
+
+@enduml
